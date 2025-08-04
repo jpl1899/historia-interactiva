@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Editar Período</title>
+</head>
+<body>
+  <h1>Editar Período</h1>
+
+  <form action="/periodos/<%= periodo._id %>?_method=PUT" method="POST">
+    <label for="nombre">Nombre:</label>
+    <input type="text" id="nombre" name="nombre" value="<%= periodo.nombre %>" required />
+
+    <br />
+
+    <label for="descripcion">Descripción:</label>
+    <textarea id="descripcion" name="descripcion" required><%= periodo.descripcion %></textarea>
+
+    <br />
+
+    <button type="submit">Guardar Cambios</button>
+  </form>
+
+  <a href="/periodos">Volver a la lista</a>
+</body>
+</html>
