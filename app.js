@@ -33,12 +33,7 @@ mongoose.connect(process.env.MONGO_URI)
 // 🟩 RUTAS
 app.use('/periodos', periodosRouter);
 
-// Ruta principal
-app.get("/", (req, res) => {
-  const nombre = "Juan";
-  const periodos = ["Prehistoria", "Edad Antigua", "Edad Media", "Edad Moderna", "Edad Contemporánea"];
-  res.render("index", { nombre, periodos });
-});
+
 
 // Ruta para ver un período específico
 const descripciones = {
