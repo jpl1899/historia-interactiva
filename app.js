@@ -5,6 +5,7 @@ import mongoose from "mongoose";
 import path from "path";
 import { fileURLToPath } from "url";
 import methodOverride from 'method-override';
+import session from "express-session";
 
 // 🟩 RUTAS Y MODELOS
 import periodosRouter from './routes/periodos.js';
@@ -29,6 +30,15 @@ console.log("🔍 URI leída:", process.env.MONGO_URI);
 mongoose.connect(process.env.MONGO_URI)
 .then(() => console.log("✅ Conectado a MongoDB"))
 .catch((err) => console.error("❌ Error al conectar a MongoDB:", err));
+
+
+
+app.use(session({
+  secret: "historia-interactiva-secreta",  // usá algo más seguro en producción
+  resave: false,
+  saveUninitialized: false
+}));
+
 
 // 🟩 RUTAS
 app.use('/periodos', periodosRouter);
@@ -69,22 +79,6 @@ app.get("/", (req, res) => {
   res.render("inicio"); // Renderiza la vista de inicio (inicio.ejs)
 });
 
-// 🟩 PANEL PRIVADO (requiere sesión)
-app.get("/panel", async (req, res) => {
-  const periodos = await Periodo.find();
-  res.render("periodos/index", { periodos });
-});
-
-
-// 🟩 CONFIGURAR SESIONES
-import session from "express-session";
-
-app.use(session({
-  secret: "historia-interactiva-secreta",  // Usá algo más seguro en producción
-  resave: false,
-  saveUninitialized: false
-}));
-
 // 🟩 MIDDLEWARE: Verificar si el usuario está logueado
 function protegerRuta(req, res, next) {
   if (!req.session.usuarioId) {
@@ -92,6 +86,13 @@ function protegerRuta(req, res, next) {
   }
   next();
 }
+
+// 🟩 PANEL PRIVADO (requiere sesión)
+app.get("/panel", protegerRuta, async (req, res) => {
+  const periodos = await Periodo.find();
+  res.render("periodos/index", { periodos });
+});
+
 
 
 
