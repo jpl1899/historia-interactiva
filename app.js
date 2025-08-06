@@ -66,6 +66,34 @@ app.listen(port, () => {
   console.log(`🚀 Servidor iniciado en http://localhost:${port}`);
 });
 
+// 🟩 RUTA DE INICIO (HOME PÚBLICO)
+app.get("/", (req, res) => {
+  res.render("inicio"); // Renderiza la vista de inicio (inicio.ejs)
+});
+
+app.get("/panel", async (req, res) => {
+  const periodos = await Periodo.find();
+  res.render("periodos/index", { periodos });
+});
+
+// 🟩 CONFIGURAR SESIONES
+import session from "express-session";
+
+app.use(session({
+  secret: "historia-interactiva-secreta",  // Usá algo más seguro en producción
+  resave: false,
+  saveUninitialized: false
+}));
+
+// 🟩 MIDDLEWARE: Verificar si el usuario está logueado
+function protegerRuta(req, res, next) {
+  if (!req.session.usuarioId) {
+    return res.redirect("/usuarios/login");
+  }
+  next();
+}
+
+
 
 
 

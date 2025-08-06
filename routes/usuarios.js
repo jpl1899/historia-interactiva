@@ -54,4 +54,16 @@ router.post("/login", async (req, res) => {
   }
 });
 
+// Login exitoso
+req.session.usuarioId = usuario._id; // Guardar el ID en la sesión
+res.redirect("/panel");              // Redirigir al panel
+
+// 🟩 CERRAR SESIÓN
+router.get("/logout", (req, res) => {
+  req.session.destroy(() => {
+    res.redirect("/");
+  });
+});
+
+
 
