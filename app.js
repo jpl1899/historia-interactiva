@@ -71,10 +71,12 @@ app.get("/", (req, res) => {
   res.render("inicio"); // Renderiza la vista de inicio (inicio.ejs)
 });
 
+// 🟩 PANEL PRIVADO (requiere sesión)
 app.get("/panel", async (req, res) => {
   const periodos = await Periodo.find();
   res.render("periodos/index", { periodos });
 });
+
 
 // 🟩 CONFIGURAR SESIONES
 import session from "express-session";
