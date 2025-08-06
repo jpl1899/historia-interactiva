@@ -1,64 +1,58 @@
-// 🟩 IMPORTAR MÓDULOS NECESARIOS
+// routes/usuarios.js
+
 import express from "express";
 import Usuario from "../models/Usuario.js";
 import bcrypt from "bcrypt";
 
-
-// 🟩 CREAR EL ROUTER
 const router = express.Router();
 
-// 🟩 MOSTRAR FORMULARIO DE REGISTRO
+// 🟩 Ruta: Formulario de registro
 router.get("/registro", (req, res) => {
-  res.render("usuarios/registro"); // Renderiza la vista de registro
+  res.render("usuarios/registro");
 });
 
-// 🟩 PROCESAR REGISTRO DE USUARIO (AHORA ENCRIPTA CONTRASEÑA)
+// 🟩 Ruta: Procesar formulario de registro
 router.post("/registro", async (req, res) => {
   const { nombre, email, password } = req.body;
   try {
-    // Encriptar la contraseña antes de guardar
-    const hash = await bcrypt.hash(password, 10); // 10 es el nivel de "salting"
-    const nuevoUsuario = new Usuario({ nombre, email, password: hash });
-    await nuevoUsuario.save();
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const usuario = new Usuario({ nombre, email, password: hashedPassword });
+    await usuario.save();
     res.redirect("/usuarios/login");
   } catch (error) {
-    res.render("usuarios/registro", { error: "Error al registrar usuario. ¿Email ya registrado?" });
+    res.status(500).send("Error al registrar el usuario.");
   }
 });
 
-
-// 🟩 MOSTRAR FORMULARIO DE LOGIN
+// 🟩 Ruta: Formulario de login
 router.get("/login", (req, res) => {
   res.render("usuarios/login");
 });
 
-// 🟩 PROCESAR LOGIN DE USUARIO (AHORA COMPARA HASH)
+// 🟩 Ruta: Procesar formulario de login
 router.post("/login", async (req, res) => {
-  const { email, password } = req.body;
   try {
+    const { email, password } = req.body;
     const usuario = await Usuario.findOne({ email });
+
     if (!usuario) {
-      return res.render("usuarios/login", { error: "Usuario o contraseña incorrectos." });
+      return res.status(401).send("Email no registrado");
     }
 
-    // Comparar la contraseña ingresada con el hash guardado
-    const match = await bcrypt.compare(password, usuario.password);
-    if (!match) {
-      return res.render("usuarios/login", { error: "Usuario o contraseña incorrectos." });
+    const passwordValido = await bcrypt.compare(password, usuario.password);
+    if (!passwordValido) {
+      return res.status(401).send("Contraseña incorrecta");
     }
 
-    // Login exitoso
-    res.redirect("/");
-  } catch (error) {
-    res.render("usuarios/login", { error: "Ocurrió un error al iniciar sesión." });
+    req.session.usuarioId = usuario._id;
+    res.redirect("/panel");
+  } catch (err) {
+    console.error("❌ Error al hacer login:", err);
+    res.status(500).send("Error interno del servidor");
   }
 });
 
-// Login exitoso
-req.session.usuarioId = usuario._id; // Guardar el ID en la sesión
-res.redirect("/panel");              // Redirigir al panel
-
-// 🟩 CERRAR SESIÓN
+// 🟩 Ruta: Cerrar sesión
 router.get("/logout", (req, res) => {
   req.session.destroy(() => {
     res.redirect("/");
@@ -66,6 +60,4 @@ router.get("/logout", (req, res) => {
 });
 
 export default router;
-
-
 
