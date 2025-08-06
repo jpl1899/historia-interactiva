@@ -32,6 +32,9 @@ mongoose.connect(process.env.MONGO_URI)
 
 // 🟩 RUTAS
 app.use('/periodos', periodosRouter);
+import usuariosRouter from './routes/usuarios.js';
+app.use('/usuarios', usuariosRouter);
+
 
 
 
